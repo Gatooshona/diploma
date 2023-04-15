@@ -1,5 +1,6 @@
 import requests
 import os
+from tqdm import tqdm
 
 
 class YandexDisk:
@@ -17,7 +18,6 @@ class YandexDisk:
         params = {'path': disk_file_path, 'overwrite': 'true'}
         response = requests.get(upload_url, headers=headers, params=params)
         data = response.json()
-        print(data)
         href = data.get('href')
         return href
 
@@ -39,14 +39,9 @@ class YandexDisk:
 
         file_list = os.listdir(path=target_dir_name)
 
-        for file in file_list:
+        for file in tqdm(file_list):
             ya_disk_path = f'{ya_disk_file_path}/{file}'
             href = self._get_upload_link(disk_file_path=ya_disk_path)
 
             local_file_path = os.path.join(os.getcwd(), target_dir_name, file)
-            response = requests.put(href, data=open(local_file_path, 'rb'))
-
-            if response.status_code == 201:
-                print(f'File {file} successfully uploaded')
-            else:
-                print(f'File {file} error')
+            requests.put(href, data=open(local_file_path, 'rb'))
